@@ -18,14 +18,19 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_development_dependency "bundler", "~> 2.0"
+  spec.add_development_dependency "bundler", RUBY_VERSION < "2.5" ? "~> 1.0" : "~> 2.0"
   spec.add_development_dependency "rake"
-  spec.add_development_dependency "rspec", "~> 2.13"
+  spec.add_development_dependency "rspec", "~> 3.13"
   spec.add_development_dependency "activemodel", ">= 4.2"
-  spec.add_development_dependency "coveralls"
+  spec.add_development_dependency "concurrent-ruby", "1.3.4"
+  spec.add_development_dependency "bigdecimal" if RUBY_VERSION >= "3.4" && ENV["RAILS_VERSION"] == "~> 7.0.0"
+  spec.add_development_dependency "drb"        if RUBY_VERSION >= "3.4" && ENV["RAILS_VERSION"] == "~> 7.0.0"
+  spec.add_development_dependency "mutex_m"    if RUBY_VERSION >= "3.4" && ENV["RAILS_VERSION"] == "~> 7.0.0"
+  spec.add_development_dependency "pry-byebug"
 
   spec.add_dependency "actionpack", ">= 4.2"
   spec.add_dependency "psych", ">= 2.0"
+  spec.add_dependency "loofah", "2.20.0" if RUBY_VERSION < "2.5"
 
   spec.required_ruby_version = '>= 2.4'
 end

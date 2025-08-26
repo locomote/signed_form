@@ -1,11 +1,13 @@
+require 'base64'
+
 module SignedForm
   module FormBuilder
     FIELDS_TO_SIGN = [{:select => :multiple_select?}, {:collection_select => :multiple_select?},
                       {:grouped_collection_select => :multiple_select?},
-                      :time_zone_select, :collection_radio_buttons, {:collection_check_boxes => []},
-                      :date_select, :datetime_select, :time_select,
+                      :time_zone_select, :collection_radio_buttons, {:collection_check_boxes => []}, {:collection_checkboxes => []},
+                      :date_select, :datetime_select, :time_select, :weekday_select,
                       :text_field, :password_field, :hidden_field,
-                      :file_field, :text_area, :check_box,
+                      :file_field, :text_area, :textarea, :check_box, :checkbox,
                       :radio_button, :color_field,
                       :telephone_field, :phone_field, :date_field,
                       :time_field, :datetime_field, :datetime_local_field,
@@ -93,12 +95,28 @@ module SignedForm
 
     private
 
+    def determine_html_method
+      return if ::ActionView::VERSION::MAJOR < 7
+
+      if object.respond_to?(:persisted?) && object.persisted?
+        :patch
+      else
+        :post
+      end
+    end
+
+    def determine_url
+      return if ::ActionView::VERSION::MAJOR < 7
+
+      options[:signed_url]
+    end
+
     def prepare_signed_attributes_hash
       @signed_attributes[:_options_] = {}
 
       if options[:sign_destination]
-        @signed_attributes[:_options_][:method] = options[:html][:method]
-        @signed_attributes[:_options_][:url]    = options[:url]
+        @signed_attributes[:_options_][:method] = options.dig(:html, :method) || options[:method] || determine_html_method
+        @signed_attributes[:_options_][:url]    = options[:url] || determine_url
       end
 
       if options[:digest]

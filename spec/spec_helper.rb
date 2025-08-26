@@ -3,13 +3,10 @@ require 'action_view/template'
 require 'action_controller'
 require 'active_model'
 require 'action_controller'
+require 'action_controller/test_case'
 require 'active_support/core_ext'
-
-require 'coveralls'
-Coveralls.wear! do
-  add_filter "/spec/"
-end
-
+require 'base64'
+require 'pry-byebug'
 require 'signed_form'
 
 module SignedFormViewHelper
@@ -34,24 +31,34 @@ module SignedFormViewHelper
     false
   end
 
-  def user_path(*)
-    '/users'
+  def url_for(options = {})
+    case options
+    when String
+      options
+    when Hash
+      # In reality, Rails hits `routes.url_for` here
+      "/some/path?#{options.to_a.join('=')}"
+    else
+      "/some/path"
+    end
   end
 
-  def polymorphic_path(*)
-    '/users'
-  end
+  def polymorphic_path(model, options = {})
+    path = if model.persisted?
+      "/users/#{model.to_key.join}"
+    else
+      "/users/new"
+    end
 
-  def _routes(*)
-    double('routes', url_for: '')
+    if options[:format]
+      "#{path}.#{options[:format]}"
+    else
+      path
+    end
   end
 
   def controller(*)
     double('controller')
-  end
-
-  def default_url_options
-    {}
   end
 
   def get_data_from_form(content)
@@ -59,13 +66,24 @@ module SignedFormViewHelper
   end
 end
 
+module Helpers
+  def ruby_version_satisfies?(ver)
+    Gem::Requirement.new(ver).satisfied_by?(Gem::Version.new(RUBY_VERSION))
+  end
+
+  def rails_version_satisfies?(ver)
+    Gem::Requirement.new(ver).satisfied_by?(ActionPack::gem_version)
+  end
+end
+
 RSpec.configure do |config|
-  config.treat_symbols_as_metadata_keys_with_true_values = true
   config.run_all_when_everything_filtered = true
 
-  config.filter_run_excluding action_pack: ->(version) { ActionPack::VERSION::STRING.match(/\d+\.\d+/)[0] !~ version }
+  config.expect_with(:rspec) { |c| c.syntax = [:expect, :should] }
 
   config.order = 'random'
+
+  config.extend Helpers
 
   config.around(:each) do |example|
     pristine_module = SignedForm.dup
