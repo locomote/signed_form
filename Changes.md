@@ -1,3 +1,8 @@
+## 0.6.0
+* Add Ruby 3.2, 3.3 & 3.4 support
+* Add Rails 7.0, 7.1, 7.2 & 8.0 support
+* Automatically test all combinations of the above plus older versions down to Ruby 2.4 & Rails 4.2
+
 ## 0.5.0
 This release is owed entirely to [@eric1234][] & [@schuetzm][], thank you both  
 for your efforts and patience.

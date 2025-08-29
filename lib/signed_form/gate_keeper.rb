@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'base64'
+
 module SignedForm
   class GateKeeper
     attr_reader :allowed_attributes

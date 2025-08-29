@@ -2,6 +2,7 @@
 
 require 'action_view'
 require 'action_controller'
+require 'base64'
 
 require 'signed_form/version'
 require 'signed_form/errors'
